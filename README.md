@@ -10,6 +10,6 @@ Solution is found when planning and execution shows no collision
 
 # Actual behavior
 
-Solution is found when planning, we see a collision beteen the grasped object and the side of the box when clicking on the MTC solution. Execution confirms that saying a collision has been found. 
+Solution is found when planning, we see a collision between the grasped object and the side of the box or the support table when clicking on the MTC solution. Execution confirms that, saying a collision has been found. 
 
 
