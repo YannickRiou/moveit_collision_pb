@@ -226,11 +226,6 @@ int main(int argc, char** argv)
 
 	ros::NodeHandle nh("~");
 
-
-	std::cout << "waiting for any key + <enter>\n";
-	char ch;
-	std::cin >> ch;
-
 	moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 	spawnObject(planning_scene_interface);
 
@@ -239,6 +234,7 @@ int main(int argc, char** argv)
 		planTest(t);
 
 		std::cout << "waiting for any key + <enter>\n";
+		char ch;
 		std::cin >> ch;
 	}
 	catch (const InitStageException &e) {
