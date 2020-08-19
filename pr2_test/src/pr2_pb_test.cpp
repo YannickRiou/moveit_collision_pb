@@ -234,9 +234,6 @@ int main(int argc, char** argv)
 	moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 	spawnObject(planning_scene_interface);
 
-	std::cout << "waiting for any key + <enter>\n";
-	std::cin >> ch;
-
 	Task t("myTask");
 	try {
 		planTest(t);
