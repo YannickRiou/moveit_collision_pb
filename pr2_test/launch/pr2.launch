@@ -1,0 +1,9 @@
+<launch>
+
+<include file="$(find pr2_moveit_config)/launch/demo.launch">
+  <arg name="fake" value="true"/>
+</include>
+
+<node name="pr2_pb_test" pkg="pr2_test" type="pr2_pb_test" respawn="false" output="screen"/>
+
+</launch>
