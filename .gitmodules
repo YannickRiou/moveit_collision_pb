@@ -1,0 +1,34 @@
+[submodule "moveit_pr2"]
+	path = moveit_pr2
+    branch = melodic_devel_pr2
+	url = https://github.com/YannickRiou/moveit_pr2.git
+
+[submodule "moveit_task_constructor"]
+    path = moveit_task_constructor
+	branch = master
+    url = https://github.com/YannickRiou/moveit_task_constructor
+        
+[submodule "rosparam_shortcuts"]
+	path = rosparam_shortcuts
+	branch = melodic-devel
+	url = https://github.com/YannickRiou/rosparam_shortcuts
+
+[submodule "moveit"]
+	path = moveit
+	branch = master
+	url = https://github.com/YannickRiou/moveit.git
+	
+[submodule "ros_pytest"]
+	path = ros_pytest
+	branch = melodic-devel
+	url = https://github.com/machinekoder/ros_pytest
+
+[submodule "moveit_msgs"]
+	path = moveit_msgs
+	branch = master
+	url = https://github.com/ros-planning/moveit_msgs
+
+[submodule "geometric_shapes"]
+	path = geometric_shapes
+	branch = master
+	url = https://github.com/ros-planning/geometric_shapes
