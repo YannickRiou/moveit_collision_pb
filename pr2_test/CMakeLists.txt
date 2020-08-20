@@ -131,6 +131,9 @@ include_directories(
 add_executable(pr2_pb_test src/pr2_pb_test.cpp)
 target_link_libraries(pr2_pb_test ${catkin_LIBRARIES})
 
+add_executable(pr2_pb_test_moveit src/pr2_pb_test_moveit.cpp)
+target_link_libraries(pr2_pb_test_moveit ${catkin_LIBRARIES})
+
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
