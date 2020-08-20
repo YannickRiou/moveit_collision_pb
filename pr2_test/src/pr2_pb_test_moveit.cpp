@@ -201,7 +201,17 @@ int main(int argc, char** argv)
 	planning_scene_interface.applyAttachedCollisionObject(ao);
 
 	left_arm_move_group.setNamedTarget("end");
-	left_arm_move_group.move();
+
+	moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+
+	// Plan doesn't show the collision object moving with the gripper
+	bool success = (left_arm_move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+
+	std::cout << "waiting for any key + <enter>\n";
+	char ch;
+	std::cin >> ch;
+	
+	left_arm_move_group.execute(my_plan);
 
 
 
