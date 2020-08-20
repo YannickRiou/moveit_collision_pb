@@ -1,4 +1,4 @@
-# moveit_collision_pb
+# moveit_collision_pb using MTC
 
 # Step to reproduce 
 
