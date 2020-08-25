@@ -13,6 +13,11 @@
 #include <moveit/task_constructor/stages/modify_planning_scene.h>
 #include <moveit/task_constructor/stages/compute_ik.h>
 #include <moveit/task_constructor/stages/fixed_state.h>
+#include <moveit/task_constructor/solvers/joint_interpolation.h>
+
+#include <geometric_shapes/shapes.h>
+#include <geometric_shapes/mesh_operations.h>
+#include <geometric_shapes/shape_operations.h>
 
 #include<string>
 
@@ -43,12 +48,12 @@ void spawnObject(moveit::planning_interface::PlanningSceneInterface& psi) {
 	o.primitives.resize(1);
 	o.primitives[0].type= shape_msgs::SolidPrimitive::BOX;
 	o.primitives[0].dimensions.resize(3);
-	o.primitives[0].dimensions[0]= 0.05;
-	o.primitives[0].dimensions[1]= 0.05;
-	o.primitives[0].dimensions[2]= 0.20;
+	o.primitives[0].dimensions[0]= 0.055;
+	o.primitives[0].dimensions[1]= 0.055;
+	o.primitives[0].dimensions[2]= 0.055*2;
 	psi.applyCollisionObject(o);
 
-	o.id= "obstacle";
+	/*o.id= "obstacle";
 	o.header.frame_id= "base_footprint";
 	o.primitive_poses.resize(1);
 	o.primitive_poses[0].position.x = 0.6;
@@ -83,8 +88,7 @@ void spawnObject(moveit::planning_interface::PlanningSceneInterface& psi) {
 	o.primitives[0].dimensions[1]= 0.05;
 	o.primitives[0].dimensions[2]= 0.30;
 	psi.applyCollisionObject(o);
-
-
+	
 	o.id= "obstacle3";
 	o.header.frame_id= "base_footprint";
 	o.primitive_poses.resize(1);
@@ -102,6 +106,32 @@ void spawnObject(moveit::planning_interface::PlanningSceneInterface& psi) {
 	o.primitives[0].dimensions[1]= 0.30;
 	o.primitives[0].dimensions[2]= 0.05;
 	psi.applyCollisionObject(o);
+
+	*/
+	moveit_msgs::CollisionObject box;
+	shape_msgs::Mesh mesh;
+  	shapes::ShapeMsg mesh_msg;
+  	shapes::Mesh* m;
+
+	box.id = "obstacle";
+	box.header.frame_id= "base_footprint";
+	std::string mesh_uri("package://pr2_test/mesh/dt_box.dae");
+	m = shapes::createMeshFromResource(mesh_uri);
+	shapes::constructMsgFromShape(m, mesh_msg);
+	mesh = boost::get<shape_msgs::Mesh>(mesh_msg);
+	// Add the mesh to the Collision object message
+	box.meshes.push_back(mesh);
+	geometry_msgs::Pose pose;
+	pose.orientation.x = 0.0;
+	pose.orientation.y = 0.0;
+	pose.orientation.z = -0.707;
+	pose.orientation.w = 0.707;	
+	pose.position.x = 0.66;
+	pose.position.y = -0.20;
+	pose.position.z = 0.91;
+	box.mesh_poses.push_back(pose);
+	psi.applyCollisionObject(box);
+	
 
 
 	moveit_msgs::CollisionObject table;
@@ -131,9 +161,12 @@ void planTest(Task &t) {
 	auto cartesian = std::make_shared<solvers::CartesianPath>();
 	cartesian->setProperty("jump_threshold", 0.0);
 
+	auto gripper_planner = std::make_shared<solvers::JointInterpolationPlanner>();
+
 	// planner used for connect
 	auto pipeline = std::make_shared<solvers::PipelinePlanner>();
 	pipeline->setPlannerId("RRTConnect");
+	pipeline->setProperty("longest_valid_segment_fraction", 0.00001);
 
 	Stage* current_state = nullptr;
 	auto initial = std::make_unique<stages::CurrentState>("current state");
@@ -148,7 +181,14 @@ void planTest(Task &t) {
 	}
 
 	{
-		auto stage = std::make_unique<stages::MoveTo>("Left open", pipeline);
+		auto stage = std::make_unique<stages::MoveTo>("Left start", pipeline);
+		stage->setProperty("group", "left_arm");
+		stage->setGoal("LEFT_ARM_INITIAL_POSE");
+		t.add(std::move(stage));
+	}
+
+	{
+		auto stage = std::make_unique<stages::MoveTo>("Left open", gripper_planner);
 		stage->setProperty("group", "left_gripper");
 		stage->setGoal("left_open");
 		t.add(std::move(stage));
@@ -171,6 +211,7 @@ void planTest(Task &t) {
 
 
 	{
+		
 		auto stage = std::make_unique<stages::MoveTo>("left end", pipeline);
 		stage->setProperty("group", "left_arm");
 		stage->setGoal("end");
