@@ -19,7 +19,8 @@ When executing, moveit reports a collision between grasped object and scene obje
 Video of the full execution with problems can be downloaded here : https://drop.infini.fr/r/rhAueKWvPz#RTYiVoFPqQNNQQg0jtqFUlyN57CPbgP/KyGi3KwDPUA=
 
 Timecode :  
-0:24 Adding custom scene and publish it  
+0:24 Adding custom scene and publish it while pr2 is homing his arms  
+0:24 - 2:45 Planning and executing pick of cubes  
 2:45 Planning of place_left task   
 2:51 - 3:15 Solution is found, showing the planned path with collision  
 3:23 - 3:32 Showing another planned solution with collision  
