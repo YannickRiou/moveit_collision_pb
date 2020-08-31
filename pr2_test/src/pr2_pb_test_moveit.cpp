@@ -14,6 +14,10 @@
 #include <moveit/task_constructor/stages/compute_ik.h>
 #include <moveit/task_constructor/stages/fixed_state.h>
 
+#include <geometric_shapes/shapes.h>
+#include <geometric_shapes/mesh_operations.h>
+#include <geometric_shapes/shape_operations.h>
+
 #include<string>
 
 #include <moveit_task_constructor_msgs/ExecuteTaskSolutionAction.h>
@@ -34,7 +38,7 @@ void spawnObject(moveit::planning_interface::PlanningSceneInterface& psi) {
 	o.primitive_poses.resize(1);
 	o.primitive_poses[0].position.x = 0.65;
 	o.primitive_poses[0].position.y = 0.18;
-	o.primitive_poses[0].position.z = 0.86;
+	o.primitive_poses[0].position.z = 0.88;
 	o.primitive_poses[0].orientation.x =0.0;
 	o.primitive_poses[0].orientation.y =0.0;
 	o.primitive_poses[0].orientation.z =0.0;
@@ -42,12 +46,12 @@ void spawnObject(moveit::planning_interface::PlanningSceneInterface& psi) {
 	o.primitives.resize(1);
 	o.primitives[0].type= shape_msgs::SolidPrimitive::BOX;
 	o.primitives[0].dimensions.resize(3);
-	o.primitives[0].dimensions[0]= 0.05;
-	o.primitives[0].dimensions[1]= 0.05;
-	o.primitives[0].dimensions[2]= 0.20;
+	o.primitives[0].dimensions[0]= 0.055;
+	o.primitives[0].dimensions[1]= 0.055;
+	o.primitives[0].dimensions[2]= 0.055*2;
 	psi.applyCollisionObject(o);
 
-	o.id= "obstacle";
+	/*o.id= "obstacle";
 	o.header.frame_id= "base_footprint";
 	o.primitive_poses.resize(1);
 	o.primitive_poses[0].position.x = 0.6;
@@ -82,8 +86,7 @@ void spawnObject(moveit::planning_interface::PlanningSceneInterface& psi) {
 	o.primitives[0].dimensions[1]= 0.05;
 	o.primitives[0].dimensions[2]= 0.30;
 	psi.applyCollisionObject(o);
-
-
+	
 	o.id= "obstacle3";
 	o.header.frame_id= "base_footprint";
 	o.primitive_poses.resize(1);
@@ -101,6 +104,32 @@ void spawnObject(moveit::planning_interface::PlanningSceneInterface& psi) {
 	o.primitives[0].dimensions[1]= 0.30;
 	o.primitives[0].dimensions[2]= 0.05;
 	psi.applyCollisionObject(o);
+
+	*/
+	moveit_msgs::CollisionObject box;
+	shape_msgs::Mesh mesh;
+  	shapes::ShapeMsg mesh_msg;
+  	shapes::Mesh* m;
+
+	box.id = "obstacle";
+	box.header.frame_id= "base_footprint";
+	std::string mesh_uri("package://pr2_test/mesh/dt_box.dae");
+	m = shapes::createMeshFromResource(mesh_uri);
+	shapes::constructMsgFromShape(m, mesh_msg);
+	mesh = boost::get<shape_msgs::Mesh>(mesh_msg);
+	// Add the mesh to the Collision object message
+	box.meshes.push_back(mesh);
+	geometry_msgs::Pose pose;
+	pose.orientation.x = 0.0;
+	pose.orientation.y = 0.0;
+	pose.orientation.z = -0.707;
+	pose.orientation.w = 0.707;	
+	pose.position.x = 0.66;
+	pose.position.y = -0.20;
+	pose.position.z = 0.91;
+	box.mesh_poses.push_back(pose);
+	psi.applyCollisionObject(box);
+	
 
 
 	moveit_msgs::CollisionObject table;
@@ -176,7 +205,11 @@ int main(int argc, char** argv)
 	moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 	spawnObject(planning_scene_interface);
 
-	moveit_msgs::CollisionObject o;
+	std::cout << "waiting for any key + <enter>\n";
+	char ch;
+	std::cin >> ch;
+
+	/*moveit_msgs::CollisionObject o;
 	o.id= "object";
 	o.header.frame_id= "base_footprint";
 	o.primitive_poses.resize(1);
@@ -192,23 +225,27 @@ int main(int argc, char** argv)
 	o.primitives[0].dimensions.resize(3);
 	o.primitives[0].dimensions[0]= 0.05;
 	o.primitives[0].dimensions[1]= 0.05;
-	o.primitives[0].dimensions[2]= 0.20;
+	o.primitives[0].dimensions[2]= 0.20;*/
 
 	moveit_msgs::AttachedCollisionObject ao;
 	ao.link_name = "l_gripper_tool_frame";
-	ao.object=o;
-
-	planning_scene_interface.applyAttachedCollisionObject(ao);
+	ao.object.id="object";
 
 	left_arm_move_group.setNamedTarget("end");
 
+	planning_scene_interface.applyAttachedCollisionObject(ao);
+
 	moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+
+
+	std::cout << "waiting for any key + <enter>\n";
+	std::cin >> ch;
 
 	// Plan doesn't show the collision object moving with the gripper
 	bool success = (left_arm_move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
 
+
 	std::cout << "waiting for any key + <enter>\n";
-	char ch;
 	std::cin >> ch;
 	
 	left_arm_move_group.execute(my_plan);

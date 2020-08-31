@@ -1,0 +1,13 @@
+<launch>
+
+<include file="$(find pr2_moveit_config)/launch/demo.launch">
+  <arg name="fake" value="true"/>
+</include>
+
+<node name="pr2_tasks" pkg="pr2_test" type="pr2_tasks" respawn="false" output="screen">
+<param name="left" type="string" value="obj_206" />
+<param name="right" type="string" value="obj_230" />
+<param name="planner" type="string" value="RRTConnect" />
+</node>
+
+</launch>
