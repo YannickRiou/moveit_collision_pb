@@ -590,10 +590,13 @@ int main(int argc, char** argv)
 	placePoseBox_left.pose.orientation.z = 0.500;
 	placePoseBox_left.pose.orientation.w = 0.500;
 
+	Task homeLeft("homeLeft");
+	Task homeRight("homeRight");
+
 	// Create task objects
 	Task approachLeft("approachLeft");
-  Task pick_left("pick_left");
-  Task place_left("place_left");
+    Task pick_left("pick_left");
+    Task place_left("place_left");
 	Task retreatLeft("retreatLeft");
 
 	Task approachRight("approachRight");
@@ -601,12 +604,21 @@ int main(int argc, char** argv)
 	Task place_right("place_right");
 	Task retreatRight("retreatRight");
 
-	std::cout << "waiting for any key + <enter>\n";
-	char ch;
-	std::cin >> ch;
 
 	try
 	{
+		createMoveTask(homeLeft,pipeline, cartesian,kinematic_model,"left_arm", retreatPose_left);
+		createMoveTask(homeRight,pipeline, cartesian,kinematic_model,"right_arm", retreatPose_right);
+
+		homeLeft.plan(1);
+		execute(homeLeft);
+		homeRight.plan(1);
+		execute(homeRight);
+
+		std::cout << "[USER INPUT NEEDED] ==== waiting for any key + <enter> =======\n";
+		char ch;
+		std::cin >> ch;
+
 		createMoveTask(approachLeft,pipeline, cartesian,kinematic_model,"left_arm", approachPose_left);
 		createPickTaskCustom(pick_left,pipeline, cartesian,kinematic_model,"left_arm",left_obj, graspPose_left);
 		createPlaceTask(place_left,pipeline,cartesian,kinematic_model,"left_arm",left_obj,placePose_left);
@@ -641,7 +653,7 @@ int main(int argc, char** argv)
 
 							place_left.plan(10);
 
-							std::cout << "waiting for any key + <enter>\n";
+							std::cout << "[USER INPUT NEEDED] ==== waiting for any key + <enter> =======\n";
 							std::cin >> ch;
 							if(execute(place_left) == 0)
 							{

@@ -2,18 +2,17 @@
 
 # Step to reproduce 
 
-Launch pr2.launch located in pr2_test package . It will launch moveit, rviz and the node pr2_pb_test that move an attached object into a "box". 
+1. Launch pr2_real.launch located in pr2_test package . It will launch moveit, rviz and the node pr2_tasks.
+2. On Rviz, Import the scene located into pr2_test/scene/problematicScene.scene and don't forget to click on "Publish".
+3. In the terminal where pr2_real.launch was launched, type a random letter then hit enter, it will begin the pick and place planning (pick left, move left to home, pick right, move right to home, place left). Execution is automatically triggered for all movement except the last one (place left). User needs to enter a random letter into the terminal then press enter to trigger execution of this last task.
+ 
 
 # Expected behavior
 
-Solution is found when planning and execution shows no collision 
+Solution is found for the place when planning and execution shows no collision.
 
 # Actual behavior
 
-Solution is found when planning, we see a collision between the grasped object and the side of the box or the support table when clicking on the MTC solution. Execution confirms that, saying a collision has been found. 
-
-Here is a video of the found behavior : 
-https://catdrop.drycat.fr/r/u-xsrDL1#9JGJ/BsH/1hnOuoKNPn2vP1ioNnQMuhckpf8107xjn8=
-
-As RRT is a random planner, it sometimes manage to find a solution without a collision.
+Solution is found when planning, we see a collision between the grasped object and the side of the box or the support table when clicking on the MTC solution (place_left). Execution confirms that, saying a collision has been found. 
+When executing, moveit reports a collision between grasped object and scene object for the "place_left" task.
 
