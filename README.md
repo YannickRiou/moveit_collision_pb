@@ -16,3 +16,4 @@ Solution is found for the place when planning and execution shows no collision.
 Solution is found when planning, we see a collision between the grasped object and the side of the box or the support table when clicking on the MTC solution (place_left). Execution confirms that, saying a collision has been found. 
 When executing, moveit reports a collision between grasped object and scene object for the "place_left" task.
 
+Video of the full execution with problems can be downloaded here : https://drop.infini.fr/r/rhAueKWvPz#RTYiVoFPqQNNQQg0jtqFUlyN57CPbgP/KyGi3KwDPUA=
