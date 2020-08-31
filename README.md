@@ -17,3 +17,12 @@ Solution is found when planning, we see a collision between the grasped object a
 When executing, moveit reports a collision between grasped object and scene object for the "place_left" task.
 
 Video of the full execution with problems can be downloaded here : https://drop.infini.fr/r/rhAueKWvPz#RTYiVoFPqQNNQQg0jtqFUlyN57CPbgP/KyGi3KwDPUA=
+
+Timecode : 
+0:24 Adding custom scene and publish it
+2:45 Planning of place_left task 
+2:51 - 3:15 Solution is found, showing the planned path with collision
+3:23 - 3:32 Showing another planned solution with collision 
+3:48 - 3:56 Showing another planned solution with collision 
+4:11 User entry need to execute the best solution (the one showed between 2:51 - 3:15 that contains a collision between object and box)
+4:16 Moveit report collision between box_101 (scene object) and obj_206 (grasped object)
