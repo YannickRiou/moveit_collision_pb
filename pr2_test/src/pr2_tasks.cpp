@@ -447,6 +447,7 @@ void createPickTask(Task &pickTask,const solvers::PipelinePlannerPtr& pipeline, 
 	}
 }
 
+
 int execute(Task &t)
 {
 
@@ -468,6 +469,40 @@ int execute(Task &t)
 		return 0;
 	}
 
+}
+
+void GoHome(Task& t) 
+{
+
+	t.loadRobotModel();
+
+	auto gripper_planner = std::make_shared<solvers::JointInterpolationPlanner>();
+
+	// planner used for connect
+	auto pipeline = std::make_shared<solvers::PipelinePlanner>();
+	pipeline->setPlannerId("RRTConnect");
+	pipeline->setProperty("longest_valid_segment_fraction", 0.01);
+
+	Stage* current_state = nullptr;
+	auto initial = std::make_unique<stages::CurrentState>("current state");
+	current_state = initial.get();
+	t.add(std::move(initial));
+
+	{
+		auto stage = std::make_unique<stages::MoveTo>("right home", pipeline);
+		stage->setProperty("group", "right_arm");
+		stage->setGoal("RIGHT_ARM_INITIAL_POSE");
+		t.add(std::move(stage));
+	}
+
+	{
+		auto stage = std::make_unique<stages::MoveTo>("Left home", pipeline);
+		stage->setProperty("group", "left_arm");
+		stage->setGoal("LEFT_ARM_INITIAL_POSE");
+		t.add(std::move(stage));
+	}
+
+	t.plan(1);
 }
 
 int main(int argc, char** argv)
@@ -590,8 +625,7 @@ int main(int argc, char** argv)
 	placePoseBox_left.pose.orientation.z = 0.500;
 	placePoseBox_left.pose.orientation.w = 0.500;
 
-	Task homeLeft("homeLeft");
-	Task homeRight("homeRight");
+	Task goHome("homeLeft");
 
 	// Create task objects
 	Task approachLeft("approachLeft");
@@ -607,13 +641,8 @@ int main(int argc, char** argv)
 
 	try
 	{
-		createMoveTask(homeLeft,pipeline, cartesian,kinematic_model,"left_arm", retreatPose_left);
-		createMoveTask(homeRight,pipeline, cartesian,kinematic_model,"right_arm", retreatPose_right);
-
-		homeLeft.plan(1);
-		execute(homeLeft);
-		homeRight.plan(1);
-		execute(homeRight);
+		GoHome(goHome);
+		execute(goHome);
 
 		std::cout << "[USER INPUT NEEDED] ==== waiting for any key + <enter> =======\n";
 		char ch;
