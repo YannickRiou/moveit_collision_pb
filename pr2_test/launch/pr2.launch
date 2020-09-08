@@ -4,6 +4,9 @@
   <arg name="fake" value="true"/>
 </include>
 
+<arg name="scene_file" default="$(find pr2_test)/scene/problematicScenev2.scene"/> 
+<node name = "moveit_publish_scene_from_text" pkg= "moveit_ros_planning" type = "moveit_publish_scene_from_text" args= "$(arg scene_file)"/>
+
 <node name="pr2_pb_test" pkg="pr2_test" type="pr2_pb_test" respawn="false" output="screen"/>
 
 </launch>

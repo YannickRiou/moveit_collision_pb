@@ -92,7 +92,7 @@ void createPlaceTask(Task &placeTask, const solvers::PipelinePlannerPtr& pipelin
 		ungrasp = "right_open";
 	}
 	pipeline->setPlannerId("RRTConnect");
-	pipeline->setProperty("longest_valid_segment_fraction", 0.001);
+	pipeline->setProperty("longest_valid_segment_fraction", 0.0000001);
 
 	//Start state
 	Stage* current_state = nullptr;
