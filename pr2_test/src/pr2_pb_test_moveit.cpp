@@ -25,131 +25,99 @@
 #include <ros/ros.h>
 #include <moveit_msgs/CollisionObject.h>
 
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 
 using namespace moveit::task_constructor;
-void spawnObject(moveit::planning_interface::PlanningSceneInterface& psi) {
 
-	moveit_msgs::CollisionObject o;
-	o.id= "object";
-	o.header.frame_id= "base_footprint";
-	o.primitive_poses.resize(1);
-	o.primitive_poses[0].position.x = 0.65;
-	o.primitive_poses[0].position.y = 0.18;
-	o.primitive_poses[0].position.z = 0.88;
-	o.primitive_poses[0].orientation.x =0.0;
-	o.primitive_poses[0].orientation.y =0.0;
-	o.primitive_poses[0].orientation.z =0.0;
-	o.primitive_poses[0].orientation.w =1.0;
-	o.primitives.resize(1);
-	o.primitives[0].type= shape_msgs::SolidPrimitive::BOX;
-	o.primitives[0].dimensions.resize(3);
-	o.primitives[0].dimensions[0]= 0.055;
-	o.primitives[0].dimensions[1]= 0.055;
-	o.primitives[0].dimensions[2]= 0.055*2;
-	psi.applyCollisionObject(o);
+void pick(moveit::planning_interface::MoveGroupInterface& move_group)
+{
+  // BEGIN_SUB_TUTORIAL pick1
+  // Create a vector of grasps to be attempted, currently only creating single grasp.
+  // This is essentially useful when using a grasp generator to generate and test multiple grasps.
+  std::vector<moveit_msgs::Grasp> grasps;
+  grasps.resize(1);
 
-	/*o.id= "obstacle";
-	o.header.frame_id= "base_footprint";
-	o.primitive_poses.resize(1);
-	o.primitive_poses[0].position.x = 0.6;
-	o.primitive_poses[0].position.y = -0.05;
-	o.primitive_poses[0].position.z = 0.75+(0.30/2);
-	o.primitive_poses[0].orientation.x =0.0;
-	o.primitive_poses[0].orientation.y =0.0;
-	o.primitive_poses[0].orientation.z =0.0;
-	o.primitive_poses[0].orientation.w =1.0;
-	o.primitives.resize(1);
-	o.primitives[0].type= shape_msgs::SolidPrimitive::BOX;
-	o.primitives[0].dimensions.resize(3);
-	o.primitives[0].dimensions[0]= 0.05;
-	o.primitives[0].dimensions[1]= 0.05;
-	o.primitives[0].dimensions[2]= 0.30;
-	psi.applyCollisionObject(o);
+  // Setting grasp pose
+  // ++++++++++++++++++++++
+  // This is the pose of panda_link8. |br|
+  // From panda_link8 to the palm of the eef the distance is 0.058, the cube starts 0.01 before 5.0 (half of the length
+  // of the cube). |br|
+  // Therefore, the position for panda_link8 = 5 - (length of cube/2 - distance b/w panda_link8 and palm of eef - some
+  // extra padding)
+  grasps[0].grasp_pose.header.frame_id = "obj_230";
+  tf2::Quaternion orientation;
+  orientation.setRPY(1.57, 1.57, 0);
+  grasps[0].grasp_pose.pose.orientation = tf2::toMsg(orientation);
 
-	o.id= "obstacle2";
-	o.header.frame_id= "base_footprint";
-	o.primitive_poses.resize(1);
-	o.primitive_poses[0].position.x = 0.6;
-	o.primitive_poses[0].position.y = -0.35;
-	o.primitive_poses[0].position.z = 0.75+(0.30/2);
-	o.primitive_poses[0].orientation.x =0.0;
-	o.primitive_poses[0].orientation.y =0.0;
-	o.primitive_poses[0].orientation.z =0.0;
-	o.primitive_poses[0].orientation.w =1.0;
-	o.primitives.resize(1);
-	o.primitives[0].type= shape_msgs::SolidPrimitive::BOX;
-	o.primitives[0].dimensions.resize(3);
-	o.primitives[0].dimensions[0]= 0.05;
-	o.primitives[0].dimensions[1]= 0.05;
-	o.primitives[0].dimensions[2]= 0.30;
-	psi.applyCollisionObject(o);
-	
-	o.id= "obstacle3";
-	o.header.frame_id= "base_footprint";
-	o.primitive_poses.resize(1);
-	o.primitive_poses[0].position.x = 0.6;
-	o.primitive_poses[0].position.y = -0.20;
-	o.primitive_poses[0].position.z = 0.75+0.3;
-	o.primitive_poses[0].orientation.x =0.0;
-	o.primitive_poses[0].orientation.y =0.0;
-	o.primitive_poses[0].orientation.z =0.0;
-	o.primitive_poses[0].orientation.w =1.0;
-	o.primitives.resize(1);
-	o.primitives[0].type= shape_msgs::SolidPrimitive::BOX;
-	o.primitives[0].dimensions.resize(3);
-	o.primitives[0].dimensions[0]= 0.05;
-	o.primitives[0].dimensions[1]= 0.30;
-	o.primitives[0].dimensions[2]= 0.05;
-	psi.applyCollisionObject(o);
+  grasps[0].grasp_pose.pose.position.x = 0.0;
+  grasps[0].grasp_pose.pose.position.y = 0.0;
+  grasps[0].grasp_pose.pose.position.z = 0.20;
 
-	*/
-	moveit_msgs::CollisionObject box;
-	shape_msgs::Mesh mesh;
-  	shapes::ShapeMsg mesh_msg;
-  	shapes::Mesh* m;
+  // Setting pre-grasp approach
+  // ++++++++++++++++++++++++++  
+  /* Defined with respect to frame_id */
+  grasps[0].pre_grasp_approach.direction.header.frame_id = "base_footprint";
+  /* Direction is set as positive x axis */
+  grasps[0].pre_grasp_approach.direction.vector.z = 1.0;
+  grasps[0].pre_grasp_approach.min_distance = 0.01;
+  grasps[0].pre_grasp_approach.desired_distance = 0.115;
 
-	box.id = "obstacle";
-	box.header.frame_id= "base_footprint";
-	std::string mesh_uri("package://pr2_test/mesh/dt_box.dae");
-	m = shapes::createMeshFromResource(mesh_uri);
-	shapes::constructMsgFromShape(m, mesh_msg);
-	mesh = boost::get<shape_msgs::Mesh>(mesh_msg);
-	// Add the mesh to the Collision object message
-	box.meshes.push_back(mesh);
-	geometry_msgs::Pose pose;
-	pose.orientation.x = 0.0;
-	pose.orientation.y = 0.0;
-	pose.orientation.z = -0.707;
-	pose.orientation.w = 0.707;	
-	pose.position.x = 0.66;
-	pose.position.y = -0.20;
-	pose.position.z = 0.91;
-	box.mesh_poses.push_back(pose);
-	psi.applyCollisionObject(box);
-	
+  // Setting post-grasp retreat
+  // ++++++++++++++++++++++++++
+  /* Defined with respect to frame_id */
+  grasps[0].post_grasp_retreat.direction.header.frame_id = "base_footprint";
+  /* Direction is set as positive z axis */
+  grasps[0].post_grasp_retreat.direction.vector.z = 1.0;
+  grasps[0].post_grasp_retreat.min_distance = 0.1;
+  grasps[0].post_grasp_retreat.desired_distance = 0.25;
 
+    grasps[0].pre_grasp_posture.joint_names.resize(6);
+    grasps[0].pre_grasp_posture.joint_names[0] = "l_gripper_joint";
+    grasps[0].pre_grasp_posture.joint_names[1] = "l_gripper_motor_screw_joint";
+    grasps[0].pre_grasp_posture.joint_names[2] = "l_gripper_l_finger_joint";
+    grasps[0].pre_grasp_posture.joint_names[3] = "l_gripper_r_finger_joint";
+    grasps[0].pre_grasp_posture.joint_names[4] = "l_gripper_r_finger_tip_joint";
+    grasps[0].pre_grasp_posture.joint_names[5] = "l_gripper_l_finger_tip_joint";
 
-	moveit_msgs::CollisionObject table;
-	table.id= "tableLaas";
-	table.header.frame_id= "base_footprint";
-	table.primitive_poses.resize(1);
-	table.primitive_poses[0].position.x = 0.95;
-	table.primitive_poses[0].position.y = 0.0;
-	table.primitive_poses[0].position.z = 0.75/2;
-	table.primitive_poses[0].orientation.x =0.0;
-	table.primitive_poses[0].orientation.y =0.0;
-	table.primitive_poses[0].orientation.z =0.0;
-	table.primitive_poses[0].orientation.w =1.0;
-	table.primitives.resize(1);
-	table.primitives[0].type= shape_msgs::SolidPrimitive::BOX;
-	table.primitives[0].dimensions.resize(3);
-	table.primitives[0].dimensions[0]= 0.85;
-	table.primitives[0].dimensions[1]= 1.35;
-	table.primitives[0].dimensions[2]= 0.75;
-	psi.applyCollisionObject(table);
+    /* Set them as open, wide enough for the object to fit. */
+    grasps[0].pre_grasp_posture.points.resize(1);
+    grasps[0].pre_grasp_posture.points[0].positions.resize(6);
+    grasps[0].pre_grasp_posture.points[0].positions[0] = 0.088;
+    grasps[0].pre_grasp_posture.points[0].positions[1] = 1;
+    grasps[0].pre_grasp_posture.points[0].positions[2] = 0.477;
+    grasps[0].pre_grasp_posture.points[0].positions[3] = 0.477;
+    grasps[0].pre_grasp_posture.points[0].positions[4] = 0.477;
+    grasps[0].pre_grasp_posture.points[0].positions[5] = 0.477;
+    grasps[0].pre_grasp_posture.points[0].time_from_start = ros::Duration(5);
+
+  	grasps[0].grasp_posture.joint_names.resize(6);
+    grasps[0].grasp_posture.joint_names[0] = "l_gripper_joint";
+    grasps[0].grasp_posture.joint_names[1] = "l_gripper_motor_screw_joint";
+    grasps[0].grasp_posture.joint_names[2] = "l_gripper_l_finger_joint";
+    grasps[0].grasp_posture.joint_names[3] = "l_gripper_r_finger_joint";
+    grasps[0].grasp_posture.joint_names[4] = "l_gripper_r_finger_tip_joint";
+    grasps[0].grasp_posture.joint_names[5] = "l_gripper_l_finger_tip_joint";
+
+    grasps[0].grasp_posture.points.resize(1);
+    grasps[0].grasp_posture.points[0].positions.resize(6);
+    grasps[0].grasp_posture.points[0].positions[0] = 0.00;
+    grasps[0].grasp_posture.points[0].positions[1] = 0.00;
+    grasps[0].grasp_posture.points[0].positions[2] = 0.002;
+    grasps[0].grasp_posture.points[0].positions[3] = 0.002;
+    grasps[0].grasp_posture.points[0].positions[4] = 0.002;
+    grasps[0].grasp_posture.points[0].positions[5] = 0.002;
+    grasps[0].grasp_posture.points[0].time_from_start = ros::Duration(5);
+
+  // BEGIN_SUB_TUTORIAL pick3
+  // Set support surface as table1.
+  move_group.setSupportSurfaceName("tableLaas");
+  // Call pick to pick up the object using the grasps given
+  move_group.pick("obj_230", grasps);
+  // END_SUB_TUTORIAL
 }
 
 int main(int argc, char** argv)
@@ -159,6 +127,8 @@ int main(int argc, char** argv)
 	spinner.start();
 
 	ros::NodeHandle nh("~");
+
+	char ch;
 
 	const std::string RIGHT_ARM_PLANNING_GROUP = "right_arm";
 	const std::string LEFT_ARM_PLANNING_GROUP = "left_arm";
@@ -203,43 +173,38 @@ int main(int argc, char** argv)
 	left_arm_move_group.move();
 
 	moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-	spawnObject(planning_scene_interface);
+	//spawnObject(planning_scene_interface);
 
 	std::cout << "waiting for any key + <enter>\n";
-	char ch;
 	std::cin >> ch;
-
-	/*moveit_msgs::CollisionObject o;
-	o.id= "object";
-	o.header.frame_id= "base_footprint";
-	o.primitive_poses.resize(1);
-	o.primitive_poses[0].position.x = 0.65;
-	o.primitive_poses[0].position.y = 0.18;
-	o.primitive_poses[0].position.z = 0.86;
-	o.primitive_poses[0].orientation.x =0.0;
-	o.primitive_poses[0].orientation.y =0.0;
-	o.primitive_poses[0].orientation.z =0.0;
-	o.primitive_poses[0].orientation.w =1.0;
-	o.primitives.resize(1);
-	o.primitives[0].type= shape_msgs::SolidPrimitive::BOX;
-	o.primitives[0].dimensions.resize(3);
-	o.primitives[0].dimensions[0]= 0.05;
-	o.primitives[0].dimensions[1]= 0.05;
-	o.primitives[0].dimensions[2]= 0.20;*/
 
 	moveit_msgs::AttachedCollisionObject ao;
 	ao.link_name = "l_gripper_tool_frame";
-	ao.object.id="object";
+	ao.object.id="obj_230";
+	ao.object.operation = moveit_msgs::CollisionObject::ADD;
 
-	left_arm_move_group.setNamedTarget("end");
-
+	//left_arm_move_group.attachObject("obj_230","l_gripper_tool_frame");
 	planning_scene_interface.applyAttachedCollisionObject(ao);
+
+	 std::vector<std::string> ids;
+	 ids.push_back("obj_230");
+
+	moveit::planning_interface::PlanningSceneInterface planning_scene_interface2;
+
+
+	ROS_ERROR_STREAM("OBJ IS ATTACHED TO :" << planning_scene_interface2.getAttachedObjects(ids).at("obj_230").link_name);
+
+	//pick(left_arm_move_group);
+
 
 	moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
 
 	std::cout << "waiting for any key + <enter>\n";
 	std::cin >> ch;
+
+	left_arm_move_group.setNamedTarget("end");
+
 
 	// Plan doesn't show the collision object moving with the gripper
 	bool success = (left_arm_move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
@@ -249,6 +214,9 @@ int main(int argc, char** argv)
 	std::cin >> ch;
 	
 	left_arm_move_group.execute(my_plan);
+
+	//left_arm_move_group.attachObject("obj_230","l_gripper_tool_frame");
+	planning_scene_interface.applyAttachedCollisionObject(ao);
 
 
 

@@ -91,7 +91,7 @@ void planTest2(Task &t) {
 		stage->setProperty("group", "left_arm");
 		stage->setGoal("end");
 		t.add(std::move(stage));
-	} 
+	}
 
 	{
 		auto stage = std::make_unique<stages::MoveRelative>("pose object", cartesian);
@@ -102,6 +102,12 @@ void planTest2(Task &t) {
 		vec.header.frame_id = "l_gripper_tool_frame";
 		vec.vector.x = 1.0;
 		stage->setDirection(vec);
+		t.add(std::move(stage));
+	}
+
+	{
+		auto stage = std::make_unique<stages::ModifyPlanningScene>("detach object");
+		stage->detachObject("obj_230", "l_gripper_tool_frame");
 		t.add(std::move(stage));
 	}
 
@@ -147,20 +153,37 @@ int main(int argc, char** argv)
 	char ch;
 	std::cin >> ch;
 
-	Task t("myTask");
+	moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+
+	std::vector<std::string> ids = planning_scene_interface.getKnownObjectNames();
+	ROS_ERROR_STREAM("==================IDS BEFORE================");
+	for(int i = 0; i < ids.size(); i ++)
+	{
+	ROS_ERROR_STREAM("[" << ids[i] << "]");
+	}
+
+
+	Task t1("myTask");
 	try {
-		planTest2(t);
+		planTest2(t1);
 
 		std::cout << "waiting for any key + <enter>\n";
 		std::cin >> ch;
 
+		execute(t1);
 	}
 	catch (const InitStageException &e) {
 		std::cerr << e;
 		return EINVAL;
 	}
 
-	execute(t);
+	ids = planning_scene_interface.getKnownObjectNames();
+	ROS_ERROR_STREAM("==================IDS AFTER================");
+	for(int i = 0; i < ids.size(); i ++)
+	{
+	ROS_ERROR_STREAM("[" << ids[i] << "]");
+	}
+
 
 	return 0;
 }
