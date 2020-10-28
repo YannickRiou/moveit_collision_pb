@@ -2,13 +2,13 @@
 
 # Step to reproduce 
 
-$ git clone https://github.com/YannickRiou/moveit_collision_pb.git
-$ cd moveit_collision_pb/
-$ git checkout moveTo
-$ git submodule init
-$ git submodule update
+$ git clone https://github.com/YannickRiou/moveit_collision_pb.git  
+$ cd moveit_collision_pb/  
+$ git checkout moveTo  
+$ git submodule init  
+$ git submodule update  
 
-$ roslaunch pr2_test pr2.launch fake_execution:=true
+$ roslaunch pr2_test pr2.launch fake_execution:=true  
  
 
 # Expected behavior
