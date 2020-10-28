@@ -4,9 +4,9 @@
 	url = https://github.com/YannickRiou/moveit_pr2.git
 
 [submodule "moveit_task_constructor"]
-    path = moveit_task_constructor
-	branch = master
-    url = https://github.com/YannickRiou/moveit_task_constructor
+	path = moveit_task_constructor
+	branch = forward-master
+	url = https://github.com/ros-planning/moveit_task_constructor
         
 [submodule "rosparam_shortcuts"]
 	path = rosparam_shortcuts
